@@ -1,6 +1,7 @@
 import requests
 from unittest.mock import Mock, patch
 from core.weather_api import WeatherAPI
+from core.models import WeatherForecastResult
 
 
 class TestWeatherAPI:
@@ -47,13 +48,16 @@ class TestWeatherAPI:
 
         result = self.weather_api.get_tomorrow_forecast("Madrid")
 
-        assert result is not None
-        assert result["date"] == "2025-09-03"
-        assert result["min_temp"] == 15.0
-        assert result["max_temp"] == 25.0
-        assert result["humidity"] == 65
-        assert result["wind_speed"] == 12.5
-        assert result["wind_direction"] == "NE"
+        assert isinstance(result, WeatherForecastResult)
+        assert result.success is True
+        assert result.data is not None
+        assert result.data.city == "Madrid"
+        assert result.data.date == "2025-09-03"
+        assert result.data.min_temp == 15.0
+        assert result.data.max_temp == 25.0
+        assert result.data.humidity == 65
+        assert result.data.wind_speed == 12.5
+        assert result.data.wind_direction == "NE"
 
         mock_get.assert_called_once_with(
             "https://api.weatherapi.com/v1/forecast.json",
@@ -74,7 +78,10 @@ class TestWeatherAPI:
 
         result = self.weather_api.get_tomorrow_forecast("Madrid")
 
-        assert result is None
+        assert isinstance(result, WeatherForecastResult)
+        assert result.success is False
+        assert result.data is None
+        assert "API Error" in result.error_message
 
     @patch("core.weather_api.requests.get")
     def test_get_tomorrow_forecast_insufficient_data(self, mock_get):
@@ -87,7 +94,10 @@ class TestWeatherAPI:
 
         result = self.weather_api.get_tomorrow_forecast("Madrid")
 
-        assert result is None
+        assert isinstance(result, WeatherForecastResult)
+        assert result.success is False
+        assert result.data is None
+        assert "Insufficient data" in result.error_message
 
     @patch("core.weather_api.requests.get")
     def test_get_tomorrow_forecast_no_hours_data(self, mock_get):
@@ -114,8 +124,10 @@ class TestWeatherAPI:
 
         result = self.weather_api.get_tomorrow_forecast("Madrid")
 
-        assert result is not None
-        assert result["wind_direction"] == "N/A"
+        assert isinstance(result, WeatherForecastResult)
+        assert result.success is True
+        assert result.data is not None
+        assert result.data.wind_direction == "N/A"
 
     @patch("core.weather_api.requests.get")
     def test_get_tomorrow_forecast_json_error(self, mock_get):
@@ -126,4 +138,7 @@ class TestWeatherAPI:
 
         result = self.weather_api.get_tomorrow_forecast("Madrid")
 
-        assert result is None
+        assert isinstance(result, WeatherForecastResult)
+        assert result.success is False
+        assert result.data is None
+        assert "Invalid JSON" in result.error_message
