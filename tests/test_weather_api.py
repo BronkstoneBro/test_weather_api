@@ -1,4 +1,3 @@
-import pytest
 import requests
 from unittest.mock import Mock, patch
 from core.weather_api import WeatherAPI
@@ -15,9 +14,11 @@ class TestWeatherAPI:
     def test_init(self):
         """Test WeatherAPI initialization"""
         assert self.weather_api.api_key == "test_api_key"
-        assert self.weather_api.base_url == "https://api.weatherapi.com/v1/forecast.json"
+        assert (
+            self.weather_api.base_url == "https://api.weatherapi.com/v1/forecast.json"
+        )
 
-    @patch('core.weather_api.requests.get')
+    @patch("core.weather_api.requests.get")
     def test_get_tomorrow_forecast_success(self, mock_get):
         """Test successful API call"""
         mock_response = Mock()
@@ -31,12 +32,14 @@ class TestWeatherAPI:
                             "mintemp_c": 15.0,
                             "maxtemp_c": 25.0,
                             "avghumidity": 65,
-                            "maxwind_kph": 12.5
+                            "maxwind_kph": 12.5,
                         },
                         "hour": [
-                            {"wind_dir": "N"}, {"wind_dir": "NE"}, {"wind_dir": "E"}
-                        ]
-                    }
+                            {"wind_dir": "N"},
+                            {"wind_dir": "NE"},
+                            {"wind_dir": "E"},
+                        ],
+                    },
                 ]
             }
         }
@@ -64,7 +67,7 @@ class TestWeatherAPI:
             timeout=10,
         )
 
-    @patch('core.weather_api.requests.get')
+    @patch("core.weather_api.requests.get")
     def test_get_tomorrow_forecast_http_error(self, mock_get):
         """Test HTTP error handling"""
         mock_get.side_effect = requests.HTTPError("API Error")
@@ -73,14 +76,12 @@ class TestWeatherAPI:
 
         assert result is None
 
-    @patch('core.weather_api.requests.get')
+    @patch("core.weather_api.requests.get")
     def test_get_tomorrow_forecast_insufficient_data(self, mock_get):
         """Test handling of insufficient forecast data"""
         mock_response = Mock()
         mock_response.json.return_value = {
-            "forecast": {
-                "forecastday": [{"date": "2025-09-02"}]
-            }
+            "forecast": {"forecastday": [{"date": "2025-09-02"}]}
         }
         mock_get.return_value = mock_response
 
@@ -88,7 +89,7 @@ class TestWeatherAPI:
 
         assert result is None
 
-    @patch('core.weather_api.requests.get')
+    @patch("core.weather_api.requests.get")
     def test_get_tomorrow_forecast_no_hours_data(self, mock_get):
         """Test handling when no hourly data available"""
         mock_response = Mock()
@@ -102,10 +103,10 @@ class TestWeatherAPI:
                             "mintemp_c": 15.0,
                             "maxtemp_c": 25.0,
                             "avghumidity": 65,
-                            "maxwind_kph": 12.5
+                            "maxwind_kph": 12.5,
                         },
-                        "hour": []
-                    }
+                        "hour": [],
+                    },
                 ]
             }
         }
@@ -116,7 +117,7 @@ class TestWeatherAPI:
         assert result is not None
         assert result["wind_direction"] == "N/A"
 
-    @patch('core.weather_api.requests.get')
+    @patch("core.weather_api.requests.get")
     def test_get_tomorrow_forecast_json_error(self, mock_get):
         """Test JSON parsing error handling"""
         mock_response = Mock()
