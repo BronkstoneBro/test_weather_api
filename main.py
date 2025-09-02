@@ -40,9 +40,7 @@ def main():
         formatter = WeatherFormatter()
         result = formatter.format_weather_table(weather_data)
 
-        print("\n" + "=" * 80)
         print(result)
-        print("=" * 80)
 
     except RuntimeError as e:
         logging.critical(e)
