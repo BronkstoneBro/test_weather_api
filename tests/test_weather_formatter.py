@@ -123,7 +123,7 @@ class TestWeatherFormatter:
         assert "Weather Forecast for 2025-09-03" in result
         assert "Chisinau" in result
         assert "Amsterdam" in result
-        assert "N/A" in result  # For failed cities
+        assert "N/A" in result
 
     def test_format_weather_table_temperature_formatting(self):
         """Test temperature formatting precision"""
@@ -135,7 +135,7 @@ class TestWeatherFormatter:
                     date="2025-09-03",
                     min_temp=15.666,
                     max_temp=25.333,
-                    humidity=68,  # Changed from 67.8 to int
+                    humidity=68,
                     wind_speed=10.999,
                     wind_direction="E",
                 ),
