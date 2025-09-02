@@ -1,5 +1,7 @@
-from typing import Any
+from typing import Dict, Optional, List
 from tabulate import tabulate
+
+from .models import WeatherForecastResult
 
 CITIES = ["Chisinau", "Madrid", "Kyiv", "Amsterdam"]
 
@@ -17,27 +19,33 @@ class WeatherFormatter:
     ]
 
     @staticmethod
-    def format_weather_table(weather_data: dict[str, dict[str, Any]]) -> str:
+    def format_weather_table(weather_results: Dict[str, WeatherForecastResult]) -> str:
         """Format weather data into table"""
-        if not weather_data:
+        if not weather_results:
             return "No data to display"
 
-        date = next((data.get("date") for data in weather_data.values() if data), None)
+        date: Optional[str] = None
+        for result in weather_results.values():
+            if result.success and result.data:
+                date = result.data.date
+                break
+
         if not date:
             return "No data to display"
 
-        table_data = []
+        table_data: List[List[str]] = []
         for city in CITIES:
-            data = weather_data.get(city)
-            if data:
+            result = weather_results.get(city)
+            if result and result.success and result.data:
+                data = result.data
                 table_data.append(
                     [
                         city,
-                        f"{data['min_temp']:.1f}°C",
-                        f"{data['max_temp']:.1f}°C",
-                        f"{data['humidity']:.0f}%",
-                        f"{data['wind_speed']:.1f} kph",
-                        data["wind_direction"],
+                        f"{data.min_temp:.1f}°C",
+                        f"{data.max_temp:.1f}°C",
+                        f"{data.humidity:.0f}%",
+                        f"{data.wind_speed:.1f} kph",
+                        data.wind_direction,
                     ]
                 )
             else:
